@@ -201,34 +201,6 @@ namespace Mediation.PlanTools
             return newPlan;
         }
 
-        // Used for consistent actions.
-        public Plan GetPlanUpdateNoStep (Problem newProblem)
-        {
-            // Clone the current plan.
-            Plan newPlan = (Plan)Clone();
-
-            // Set the input problem as the new problem object.
-            newPlan.problem = newProblem;
-
-            // Create a step to represent the initial state.
-            Operator init = new Operator();
-
-            // Name the initial step.
-            init.Name = "initial";
-
-            // Set the step effects to the initial state.
-            init.Effects = newProblem.Initial;
-
-            // Add the step to the plan.
-            newPlan.InitialStep = init;
-
-            // Copy the plan's goal.
-            newPlan.GoalStep = (Operator)GoalStep.Clone();
-
-            // Return the new plan.
-            return newPlan;
-        }
-
         // Return the first state of the plan.
         public State GetFirstState ()
         {
