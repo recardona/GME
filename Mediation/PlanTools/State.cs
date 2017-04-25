@@ -56,8 +56,13 @@ namespace Mediation.PlanTools
             {
                 // Loop through the predicates.
                 foreach (IPredicate predicate in value)
-                    // And insert them in the new hashtable.
-                    table.Add(predicate, true);
+                {
+                    // If it is not already in the table, add it.
+                    if(!table.ContainsKey(predicate))
+                        // And insert them in the new hashtable.
+                        table.Add(predicate, true);
+                }
+                    
             }
         }
 
@@ -130,7 +135,17 @@ namespace Mediation.PlanTools
             return true;
         }
 
-        // Apply an operator's effects to the current state.
+        // Updates this state by applying the given action's effects to the current state.
+        public void UpdateState(Operator action, List<IObject> objects)
+        {
+            // Update the predicate state.
+            this.Predicates = ApplyAction(action, objects);
+
+            // Update the reference to the last step.
+            this.lastStep = action;
+        }
+
+        // Return a new state that reflects applying the given action's effects to the current state.
         public State NewState (Operator action, List<IObject> objects)
         {
             // Create a new state object.
