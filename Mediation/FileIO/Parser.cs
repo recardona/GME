@@ -16,7 +16,7 @@ namespace Mediation.FileIO
 {
     public static class Parser
     {
-        public static string path = @"C:\MediationService\";
+        public static string path = @"X:\Developer\GME\";
 
         // Returns the project's top directory as a string.
         public static string GetTopDirectory ()
@@ -35,9 +35,9 @@ namespace Mediation.FileIO
             // Return the new path string.
             //return @"C:\MediationService\";
             //return @"J:\Code\Mediation\GME\";
-            #if (DEBUG)
-                path = @"J:\Code\Mediation\GME\";
-            #endif
+            //#if (DEBUG)
+            //    path = @"J:\Code\Mediation\GME\";
+            //#endif
 
             if (path.Equals("")) return topDir;
             else return path;
