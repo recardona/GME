@@ -14,27 +14,29 @@ namespace Mediation.StateSpace
         // Given a plan and the current state, verify it can be executed.
         public static bool VerifyPlan (Plan plan, State state, List<IObject> objects)
         {
-            // If there are steps left in the plan...
-            if (plan.Steps.Count > 0)
+            // Create a clone of the state, to not affect the given one.
+            State stateClone = state.Clone() as State;
+
+            // Apply the entire plan to the current state.
+            for (int planStepIndex = 0; planStepIndex < plan.Steps.Count; planStepIndex++)
             {
+                Operator step = plan.Steps.ElementAt(planStepIndex) as Operator;
+                
                 // If the next plan step can be executed...
-                if (state.Satisfies(plan.Steps.First().Preconditions))
+                if(stateClone.Satisfies(step.Preconditions))
                 {
-                    // Create a new plan.
-                    Plan newPlan = plan.Clone() as Plan;
-
-                    // Remove the first step.
-                    newPlan.Steps.RemoveAt(0);
-
-                    // Update the world state and recursively call the function.
-                    return VerifyPlan(newPlan, state.NewState(plan.Steps.First() as Operator, objects), objects);
+                    // Apply it, and continue.
+                    stateClone.UpdateState(step, objects);
                 }
+
                 else
-                    // This is not a valid plan.
+                {
+                    // Otherwise, this is not a valid plan.
                     return false;
+                }
             }
-            
-            // This is a valid plan.
+
+            // If we get to the end without reporting an error, we have a valid plan.
             return true;
         }
     }
