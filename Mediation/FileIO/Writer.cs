@@ -138,50 +138,6 @@ namespace Mediation.FileIO
             }
         }
 
-        // Given a mediation node, creates an HTML representation.
-        public static void ToHTML (string directory, StateSpaceNode root)
-        {
-            string file = directory + root.id + ".html";
-
-            using (StreamWriter writer = new StreamWriter(file, false))
-            {
-                writer.WriteLine("<html>");
-                writer.WriteLine("<body>");
-                if (root.problem.Initial.Count > 0)
-                    writer.WriteLine("<b>State</b><br />");
-                foreach (Predicate pred in root.problem.Initial)
-                    writer.WriteLine(pred + "<br />");
-                if (root.problem.Initial.Count > 0)
-                    writer.WriteLine("<br /><b>Observed State</b><br />");
-                foreach (Predicate pred in root.problem.Initial)
-                    if ((bool)pred.Observing(root.problem.Player))
-                        writer.WriteLine(pred + "<br />");
-                if (root.plan.Steps.Count > 0)
-                    writer.WriteLine("<br /><b>Plan</b><br />");
-                foreach (Operator action in root.plan.Steps)
-                    writer.WriteLine(action + "<br />");
-                if (root.children.Count > 0)
-                {
-                    writer.WriteLine("<br /><b>Player Actions</b><br />");
-                    foreach (StateSpaceEdge action in root.outgoing)
-                    {
-                        StateSpaceNode child = (StateSpaceNode)root.children[action];
-                        writer.WriteLine("<a href='" + child.id + ".html'>" + child.incoming.Action + "</a><br />");
-                    }
-                }
-                if (root.parent != null)
-                {
-                    writer.WriteLine("<br /><b>Last State</b><br />");
-                    writer.WriteLine("<a href='" + root.parent.id + ".html'>Parent ID " + root.parent.id + "</a><br />");
-                }
-                writer.WriteLine("</body>");
-                writer.WriteLine("</html>");
-            }
-
-            foreach (StateSpaceNode child in root.children.Values)
-                ToHTML(directory, child);
-        }
-
         // Given a mediation node, creates an HTML representation of its initial state.
         public static void StateToHTML(string directory, StateSpaceNode root)
         {
