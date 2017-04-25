@@ -107,21 +107,35 @@ namespace Mediation.PlanTools
         // Check to see if a predicate is true in the current state.
         public bool InState (IPredicate predicate)
         {
+            // if it is a positive literal, check for membership
             if (predicate.Sign)
             {
                 if (table.ContainsKey(predicate))
-                    return (bool)table[predicate];
+                    return true;
+
                 else
                     return false;
             }
+
+            // if it is a negative literal, check for absence
             else
             {
-                Predicate reversed = predicate.Clone() as Predicate;
-                reversed.Sign = true;
-                if (table.ContainsKey(reversed))
-                    return !(bool)table[reversed];
+                predicate.Sign = true;
+
+                // If the positive version of this predicate is here,
+                if (table.ContainsKey(predicate))
+                {
+                    // Then the negative is not, return false.
+                    // Before you do, change the sign back.
+                    predicate.Sign = false;
+                    return false;
+                }
+                    
                 else
+                {
+                    predicate.Sign = true;
                     return true;
+                }
             }
         }
 
