@@ -64,6 +64,7 @@
     <Compile Include="Enums\ActionType.cs" />
     <Compile Include="Enums\Planner.cs" />
     <Compile Include="Enums\PlanType.cs" />
+    <Compile Include="FileIO\BinarySerializer.cs" />
     <Compile Include="FileIO\Writer.cs" />
     <Compile Include="Interfaces\IAxiom.cs" />
     <Compile Include="Interfaces\IDependency.cs" />
@@ -77,8 +78,19 @@
     <Compile Include="Interfaces\IProblem.cs" />
     <Compile Include="Interfaces\IState.cs" />
     <Compile Include="Interfaces\ITerm.cs" />
+    <Compile Include="KnowledgeTools\EnvironmentModel.cs" />
     <Compile Include="KnowledgeTools\KnowledgeAnnotator.cs" />
+    <Compile Include="KnowledgeTools\RobertsonMicrotheory.cs" />
+    <Compile Include="MediationTree\DomainRevisor.cs" />
+    <Compile Include="MediationTree\EventRevisor.cs" />
+    <Compile Include="MediationTree\MediationTree.cs" />
+    <Compile Include="MediationTree\MediationTreeData.cs" />
+    <Compile Include="MediationTree\MediationTreeEdge.cs" />
+    <Compile Include="MediationTree\MediationTreeNode.cs" />
+    <Compile Include="Planners\FDMulti.cs" />
     <Compile Include="Planners\Glaive.cs" />
+    <Compile Include="Planners\PlannerInterface.cs" />
+    <Compile Include="Planners\SIWthenBFS.cs" />
     <Compile Include="PlanSpace\PlanSpaceEdge.cs" />
     <Compile Include="PlanSpace\PlanSpaceNode.cs" />
     <Compile Include="PlanSpace\PlanSpaceTools.cs" />
@@ -102,7 +114,10 @@
     <Compile Include="StateSpace\StateSpaceEdge.cs" />
     <Compile Include="StateSpace\StateSpaceMediator.cs" />
     <Compile Include="StateSpace\StateSpaceNode.cs" />
+    <Compile Include="StateSpace\StateSpaceSearchTools.cs" />
     <Compile Include="StateSpace\StateSpaceTools.cs" />
+    <Compile Include="Utilities\EnumerableExtension.cs" />
+    <Compile Include="Utilities\Tuple.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -120,6 +135,17 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MediationTree\DomainRevisor.cs.meta" />
+    <None Include="MediationTree\EventRevisor.cs.meta" />
+    <None Include="MediationTree\MediationTree.cs.meta" />
+    <None Include="MediationTree\MediationTreeData.cs.meta" />
+    <None Include="MediationTree\MediationTreeEdge.cs.meta" />
+    <None Include="MediationTree\MediationTreeNode.cs.meta" />
+    <None Include="Properties\AssemblyInfo.cs.meta" />
+    <None Include="Utilities\EnumerableExtension.cs.meta" />
+    <None Include="Utilities\Tuple.cs.meta" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

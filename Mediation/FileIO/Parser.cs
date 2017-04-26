@@ -11,6 +11,7 @@ using Mediation.Interfaces;
 using Mediation.PlanTools;
 
 using Mediation.Enums;
+using System;
 
 namespace Mediation.FileIO
 {
@@ -30,17 +31,9 @@ namespace Mediation.FileIO
             // Loop through the split path.
             for (int i = 0; i < splPath.Length - 3; i++)
                 // Add the first n - 2 directories from the path.
-                topDir += splPath[i] + '\\';
+                topDir += splPath[i] + '/';
 
-            // Return the new path string.
-            //return @"C:\MediationService\";
-            //return @"J:\Code\Mediation\GME\";
-            //#if (DEBUG)
-            //    path = @"J:\Code\Mediation\GME\";
-            //#endif
-
-            if (path.Equals("")) return topDir;
-            else return path;
+            return topDir;
         }
 
         // Returns the project's top directory for a sh script.
@@ -86,6 +79,7 @@ namespace Mediation.FileIO
             // Read the file into an array.
             string[] input = System.IO.File.ReadAllLines(file);
 
+
             // How to split the file elements.
             char[] delimiterChars = { ' ', '(', ')' };
 
@@ -109,8 +103,10 @@ namespace Mediation.FileIO
                 }
 
             // Iterate through the plain text plan.
-            foreach (string line in input)
+            foreach (string lineraw in input)
             {
+				string line = lineraw.ToLower();
+
                 // Split line into elements.
                 string[] words = line.Split(delimiterChars);
 
@@ -188,7 +184,9 @@ namespace Mediation.FileIO
                         if (!word.Equals(""))
                         {
                             // Add the variable name for the current term.
-                            step.Terms.Add(new Term(temp.Predicate.TermAt(i).Variable, word, temp.Predicate.TermAt(i).Type));
+                            List<ITerm> terms = step.Terms;
+                            terms.Add(new Term(temp.Predicate.TermAt(i).Variable, word, temp.Predicate.TermAt(i).Type));
+                            step.Terms = terms;
 
                             // Iterate the counter.
                             i++;
@@ -248,6 +246,9 @@ namespace Mediation.FileIO
         // Reads in a domain from a file.
         public static Domain GetDomain (string file, PlanType type)
         {
+            bool readInStat = true;
+            int start = 0;
+
             // The domain object.
             Domain domain = new Domain();
 
@@ -256,6 +257,9 @@ namespace Mediation.FileIO
 
             // Read the domain file into a string.
             string input = System.IO.File.ReadAllText(file);
+
+            // Remove all the comments
+            input = RemovePDDLComments(input);
 
             // Split the input string by space, line feed, character return, and tab.
             string[] words = input.Split(new char[] {' ', '\r', '\n', '\t'});
@@ -266,27 +270,48 @@ namespace Mediation.FileIO
             // Loop through the word array.
             for (int i = 0; i < words.Length; i++)
             {
+                // Skip comments
+                
+
                 // Set the domain name.
                 if (words[i].Equals("(domain"))
+                {
+                    start = i - 1;
                     domain.Name = words[i + 1].Remove(words[i + 1].Length - 1);
+                }
 
                 // Begin types definitions.
                 if (words[i].Equals("(:types"))
                 {
+                    // Next word.
+                    i++;
+
                     // If the list is not empty.
-                    if (!words[i + 1].Equals(")"))
+                    if (!words[i].Equals(")"))
                         // Loop until list is finished.
                         while (words[i][words[i].Length - 1] != ')')
                         {
                             // Create a list for sub-types.
                             List<string> subTypes = new List<string>();
 
+                            // Get the subtypes individually
+                            string subType = words[i];
+                            subType = Regex.Replace(subType, @"\t|\n|\r", "");
+                            
                             // Read in the sub-types.
-                            while (!Regex.Replace(words[++i], @"\t|\n|\r", "").Equals("-"))
-                                subTypes.Add(Regex.Replace(words[i], @"\t|\n|\r", ""));
-
+                            while (!subType.Equals("-"))
+                            {
+                                subTypes.Add(subType);
+                                subType = words[++i];
+                                subType = Regex.Replace(subType, @"\t|\n|\r", "");
+                            }
+                                
                             // Associate sub-types with type in domain object.
                             domain.AddTypeList(subTypes, Regex.Replace(words[++i], @"\t|\n|\r|[()]", ""));
+
+                            // Go the next word.
+                            i++;
+
                         }
                 }
 
@@ -301,7 +326,6 @@ namespace Mediation.FileIO
                             // Create a list for sub-types.
                             List<string> constants = new List<string>();
 
-                            // Read in the sub-types.
                             while (!Regex.Replace(words[++i], @"\t|\n|\r", "").Equals("-"))
                                 constants.Add(Regex.Replace(words[i], @"\t|\n|\r", ""));
 
@@ -310,9 +334,44 @@ namespace Mediation.FileIO
                         }
                 }
 
+                // Begin predicates definitions.
+                if (words[i].Equals("(:predicates"))
+                {
+                    // If the list is not empty.
+                    if (!words[i + 1].Equals(")"))
+                        // Loop until list is finished.
+                        while ((words[i][words[i].Length - 1] != ')' || words[i][words[i].Length - 2] != ')')
+                                && (words[i][words[i].Length - 1] != ')' || !words[i + 1].Equals(")")))
+                        {
+                            Predicate pred = new Predicate();
+
+                            pred.Name = Regex.Replace(words[++i], @"\t|\n|\r|[()]", "");
+
+                            while (words[i][words[i].Length - 1] != ')')
+                            {
+                                Term term = new Term();
+                                term.Variable = Regex.Replace(words[++i], @"\t|\n|\r|[()]", "");
+                                if (Regex.Replace(words[i + 1], @"\t|\n|\r", "").Equals("-"))
+                                {
+                                    i++;
+                                    term.Type = Regex.Replace(words[++i], @"\t|\n|\r|[()]", "");
+                                }
+                                pred.Terms.Add(term);
+                            }
+                            domain.Predicates.Add(pred);
+                        }
+                }
+
                 // Begin an action definition.
                 if (words[i].Equals("(:action"))
                 {
+                    if (readInStat)
+                    {
+                        for (int stat = start; stat < i; stat++)
+                            domain.staticStart += " " + words[stat];
+                        readInStat = false;
+                    }
+
                     IOperator temp = null;
 
                     if (type == PlanType.PlanSpace)
@@ -407,14 +466,17 @@ namespace Mediation.FileIO
                         {
                             // Check for a conditional effect.
                             // THIS SHOULD PROBABLY BE CONDENSED
-                            if (words[i].Equals("(forall"))
+                            if (words[i].Equals("(forall") || words[i].Equals("(when"))
                             {
                                 // Create a new axiom object.
                                 Axiom axiom = new Axiom();
                                 
-                                // Read in the axiom's terms.
-                                while (!Regex.Replace(words[++i], @"\t|\n|\r", "").Equals("(when"))
-                                    axiom.Terms.Add(new Term(Regex.Replace(words[i], @"\t|\n|\r|[()]", "")));
+                                if (words[i].Equals("(forall"))
+                                {
+                                    // Read in the axiom's terms.
+                                    while (!Regex.Replace(words[++i], @"\t|\n|\r", "").Equals("(when"))
+                                        axiom.Terms.Add(new Term(Regex.Replace(words[i], @"\t|\n|\r|[()]", "")));
+                                }
 
                                 // If the preconditions are conjunctive.
                                 if (Regex.Replace(words[++i], @"\t|\n|\r", "").Equals("(and"))
@@ -487,7 +549,7 @@ namespace Mediation.FileIO
                                             pred.Terms.Add(new Term(Regex.Replace(words[i++], @"\t|\n|\r|[()]", "")));
 
                                         // Read the last term.
-                                        pred.Terms.Add(new Term(Regex.Replace(words[i++], @"\t|\n|\r|[()]", "")));
+                                        pred.Terms.Add(new Term(Regex.Replace(words[i], @"\t|\n|\r|[()]", "")));
 
                                         // Add the predicate to the axiom's preconditions.
                                         axiom.Preconditions.Add(pred);
@@ -510,6 +572,8 @@ namespace Mediation.FileIO
                                             // Create new predicate.
                                             Predicate pred = new Predicate();
 
+                                            parenStack++;
+
                                             // Check for a negative effect.
                                             if (words[i].Equals("(not"))
                                             {
@@ -518,6 +582,8 @@ namespace Mediation.FileIO
 
                                                 // Set the effect's sign to false.
                                                 pred.Sign = false;
+
+                                                parenStack++;
                                             }
 
                                             // Name the predicate.
@@ -535,8 +601,16 @@ namespace Mediation.FileIO
                                         }
 
                                         // Check for a close paren.
-                                        if (words[i][words[i].Length - 1] == ')')
+                                        if (words[i - 1][words[i - 1].Length - 1] == ')')
                                             parenStack--;
+
+                                        if (words[i - 1].Length > 1)
+                                            if (words[i - 1][words[i - 1].Length - 2] == ')')
+                                                parenStack--;
+
+                                        if (words[i - 1].Length > 2)
+                                            if (words[i - 1][words[i - 1].Length - 3] == ')')
+                                                parenStack--;
                                     }
                                 }
                                 else
@@ -634,6 +708,9 @@ namespace Mediation.FileIO
                 }
             }
 
+            // Create a working copy of the domain file.
+            Writer.DomainToPDDL(Parser.GetTopDirectory() + @"Benchmarks/" + domain.Name.ToLower() + @"/domrob.pddl", domain);
+
             return domain;
         }
 
@@ -645,6 +722,9 @@ namespace Mediation.FileIO
 
             // Read the domain file into a string.
             string input = System.IO.File.ReadAllText(file);
+
+            // Remove the PDDL comments
+            input = RemovePDDLComments(input);
 
             // Split the input string by space, line feed, character return, and tab.
             string[] words = input.Split(new char[] { ' ', '\r', '\n', '\t' });
@@ -681,8 +761,9 @@ namespace Mediation.FileIO
 
                                 // For all the stored objects...
                                 foreach (string tempObj in tempObjects)
-                                    // ... associate them with their type and add them to the problem.
-                                    problem.Objects.Add(new Obj(tempObj, type));
+                                    if (tempObj != "")
+                                        // ... associate them with their type and add them to the problem.
+                                        problem.Objects.Add(new Obj(tempObj, type));
 
                                 // Clear the temporary objects list.
                                 tempObjects = new List<string>();
@@ -690,7 +771,8 @@ namespace Mediation.FileIO
 
                     // Add objects with unspecified types to the problem.
                     foreach (string tempObj in tempObjects)
-                        problem.Objects.Add(new Obj(tempObj, ""));
+                        if (tempObj != "")
+                            problem.Objects.Add(new Obj(tempObj, ""));
 
                     // Add the initial state.
                     while (!Regex.Replace(words[i], @"\t|\n|\r", "").ToLower().Equals("(:goal"))
@@ -815,6 +897,37 @@ namespace Mediation.FileIO
 
             // Return the problem object.
             return problem;
+        }
+
+
+        // Removes all PDDL comments from the given input.
+        private static string RemovePDDLComments (string input)
+        {
+            StringBuilder sb = new StringBuilder();
+            char[] inputCharacterArray = input.ToArray<char>();
+
+            for (int index = 0; index < inputCharacterArray.Length; index++)
+            {
+                char c = inputCharacterArray[index];
+
+                if (c.Equals(';'))
+                {
+                    // Iterate until we hit a new line
+                    while(!c.Equals('\n'))
+                    {
+                        index++;
+                        c = inputCharacterArray[index];
+                    }
+                }
+
+                else
+                {
+                    sb.Append(c);
+                }
+
+            }
+
+            return sb.ToString();
         }
     }
 }

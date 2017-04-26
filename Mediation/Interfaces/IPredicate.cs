@@ -7,45 +7,51 @@ using System.Threading;
 
 namespace Mediation.Interfaces
 {
-    public interface IPredicate
-    {
-        // Predicates have a name.
-        string Name { get; set; }
+	public interface IPredicate
+	{
+		// Predicates have a name.
+		string Name { get; set; }
 
-        // Predicates have terms.
-        List<ITerm> Terms { get; set; }
+		// Predicates have terms.
+		List<ITerm> Terms { get; set; }
 
-        // Predicates have a sign.
-        bool Sign { get; set; }
+		// Predicates have a sign.
+		bool Sign { get; set; }
 
-        // Predicates have an arity.
-        int Arity { get; }
+		// Predicates can be static.
+		bool IsStatic { get; set; }
 
-        // Records an observation.
-        void Observes (string character, bool observation);
+		// Predicates have an arity.
+		int Arity { get; }
 
-        // Returns an observation.
-        bool Observing (string character);
+		// Records an observation.
+		void Observes(string character, bool observation);
 
-        // Returns the term at the nth position.
-        ITerm TermAt(int position);
+		// Returns an observation.
+		bool Observing(string character);
 
-        // Compares a term to a string.
-        bool TermAtEquals(int position, string compareAgainst);
+		// Returns the term at the nth position.
+		ITerm TermAt(int position);
 
-        // Checks to see if another predicate is inverse.
-        bool IsInverse(IPredicate predicate);
+		// Compares a term to a string.
+		bool TermAtEquals(int position, string compareAgainst);
 
-        // Checks to see if the predicate is in a state.
-        bool InState(List<IPredicate> state, Hashtable binds);
+		// Checks to see if another predicate is inverse.
+		bool IsInverse(IPredicate predicate);
 
-        // Rewrites term variables to their bindings.
-        void BindTerms (Hashtable binds);
+		// Checks to see if the predicate is in a state.
+		bool InState(List<IPredicate> state, Hashtable binds);
 
-        // Displays the content of the predicate without a not.
-        string ToStringPositive();
+		// Rewrites term variables to their bindings.
+		void BindTerms(Hashtable binds);
 
-        // Predicates can be cloned.
-        Object Clone();
-    }
+		// Displays the content of the predicate without a not.
+		string ToStringPositive();
+
+		// Predicates can be cloned.
+		Object Clone();
+
+		// A predicate template is a clone of this predicate with no bindings.
+		Object Template();
+	}
 }

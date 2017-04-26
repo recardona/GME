@@ -59,6 +59,7 @@
     <Compile Include="PredicateTest.cs" />
     <Compile Include="StateSpaceMediatorArthTest.cs" />
     <Compile Include="StateSpaceMediatorArthurTest.cs" />
+    <Compile Include="StateSpaceMediatorHyruleTest.cs" />
     <Compile Include="StateSpaceMediatorZombieTest.cs" />
     <Compile Include="StateSpaceToolsTest.cs" />
     <Compile Include="StateTest.cs" />

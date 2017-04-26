@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using Mediation.PlanTools;
 using Mediation.Planners;
@@ -35,7 +34,7 @@ namespace Mediation.Mediation
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("ACTION");
-            sb.AppendLine(action.ToStepString());
+            sb.AppendLine(action.ToString());
             sb.AppendLine("LINK");
             sb.AppendLine(clobberedLink.ToString());
 
