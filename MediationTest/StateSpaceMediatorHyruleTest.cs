@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -51,6 +52,14 @@ namespace MediationTest
         public void HyrulePlanTest()
         {
             Assert.AreEqual(5, testPlan.Steps.Count);
+        }
+
+        [TestMethod]
+        public void HyruleTypesTest()
+        {
+            Hashtable objsByType = testProblem.ObjectsByType;
+            List<string> locations = objsByType["location"] as List<string>;
+            Assert.AreEqual(12, locations.Count);
         }
     }
 }
